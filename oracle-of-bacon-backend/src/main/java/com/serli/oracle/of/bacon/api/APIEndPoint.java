@@ -24,8 +24,8 @@ public class APIEndPoint {
 
     @Get("bacon-to?actor=:actorName")
     public String getConnectionsToKevinBacon(String actorName) {
-
-        return "[\n" +
+        return neo4JRepository.getConnectionsToKevinBacon(actorName).toString();
+        /*return "[\n" +
                 "{\n" +
                 "\"data\": {\n" +
                 "\"id\": 85449,\n" +
@@ -63,7 +63,7 @@ public class APIEndPoint {
                 "\"value\": \"PLAYED_IN\"\n" +
                 "}\n" +
                 "}\n" +
-                "]";
+                "]";*/
     }
 
     @Get("suggest?q=:searchQuery")
@@ -75,7 +75,7 @@ public class APIEndPoint {
                 "Niro, Simão");
     }
 
-    @Get("last-searches")
+    @Get("last-searches") // ElasticSearch
     public List<String> last10Searches() {
         return Arrays.asList("Peckinpah, Sam",
                 "Robbins, Tim (I)",

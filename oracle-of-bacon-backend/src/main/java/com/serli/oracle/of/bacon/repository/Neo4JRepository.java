@@ -1,11 +1,12 @@
 package com.serli.oracle.of.bacon.repository;
 
 
-import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.*;
 
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Path;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -19,8 +20,34 @@ public class Neo4JRepository {
     public List<?> getConnectionsToKevinBacon(String actorName) {
         Session session = driver.session();
 
-        // TODO implement Oracle of Bacon
-        return null;
+        Transaction tx = session.beginTransaction();
+        String query = "MATCH p=shortestPath(\n" +
+                "  (bacon:Actor {name:\"Bacon, Kevin (I)\"})-[*]-(meg:Actor {name:\"Abadie\"})\n" +
+                ")\n" +
+                "RETURN p";
+        StatementResult result = tx.run(query);
+
+        System.out.println("SYSOU REPERE");
+        List<GraphItem> graphItemList = new ArrayList<>();
+        if (result.hasNext()) {
+            Path path = result.next().get("p").asPath();
+            System.out.println(path);
+            path.nodes().forEach( node -> {
+                graphItemList.add(new GraphNode(node.id(), node.values().toString(), node.labels().toString()));
+                //System.out.println(node.id());
+                System.out.println(node.values().toString());
+
+            });
+            /*path.relationships().forEach(relationship -> {
+                graphItemList.add(new GraphEdge());
+            });*/
+        }
+        System.out.println(graphItemList);
+
+        driver.close();
+        return graphItemList;
+
+        //System.out.println( String.format( "%s %s", record.get("p").get( "type" ).asString(), record.get("value").asString() ) );
     }
 
     private static abstract class GraphItem {
