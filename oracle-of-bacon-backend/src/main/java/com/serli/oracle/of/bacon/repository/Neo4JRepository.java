@@ -32,7 +32,6 @@ public class Neo4JRepository {
         List<GraphItem> graphItemList = new ArrayList<>();
         if (result.hasNext()) {
             Path path = result.next().get("p").asPath();
-            System.out.println(path);
             path.nodes().forEach( node -> {
                 graphItemList.add(new GraphNode(node.id(), node.values().iterator().next().asString(), node.labels().iterator().next()));
             });
@@ -75,6 +74,18 @@ public class Neo4JRepository {
             this.value = value;
             this.type = type;
         }
+
+        @Override
+        public String toString(){
+            return "{" +"\n"+
+                    "  \"data\":{" +"\n"+
+                    "    \"id\": "+this.id +"," +"\n"+
+                    "    \"value\": \""+this.value+"\"," +"\n"+
+                    "    \"type\": \""+this.type+"\"" +"\n"+
+                    "  }" +"\n"+
+                    "}";
+        }
+
     }
 
     private static class GraphEdge extends GraphItem {
@@ -87,6 +98,18 @@ public class Neo4JRepository {
             this.source = source;
             this.target = target;
             this.value = value;
+        }
+
+        @Override
+        public String toString(){
+            return "{" +"\n"+
+                    "  \"data\":{" +"\n"+
+                    "    \"id\": "+this.id +"," +"\n"+
+                    "    \"source\": "+this.source+"," +"\n"+
+                    "    \"target\": "+this.target+"," +"\n"+
+                    "    \"value\": \""+this.value+"\""+"\n"+
+                    "  }" +"\n"+
+                    "}";
         }
     }
 }
