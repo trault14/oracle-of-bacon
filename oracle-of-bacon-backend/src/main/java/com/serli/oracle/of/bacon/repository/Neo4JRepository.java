@@ -9,6 +9,8 @@ import org.neo4j.driver.v1.types.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.neo4j.driver.v1.Values.parameters;
+
 
 public class Neo4JRepository {
     private final Driver driver;
@@ -22,32 +24,24 @@ public class Neo4JRepository {
 
         Transaction tx = session.beginTransaction();
         String query = "MATCH p=shortestPath(\n" +
-                "  (bacon:Actor {name:\"Bacon, Kevin (I)\"})-[*]-(meg:Actor {name:\"Abadie\"})\n" +
+                "  (bacon:Actor {name:\"Bacon, Kevin (I)\"})-[*]-(meg:Actor {name: {name}})\n" +
                 ")\n" +
                 "RETURN p";
-        StatementResult result = tx.run(query);
+        StatementResult result = tx.run(query, parameters("name", actorName));
 
-        System.out.println("SYSOU REPERE");
         List<GraphItem> graphItemList = new ArrayList<>();
         if (result.hasNext()) {
             Path path = result.next().get("p").asPath();
             System.out.println(path);
             path.nodes().forEach( node -> {
-                graphItemList.add(new GraphNode(node.id(), node.values().toString(), node.labels().toString()));
-                //System.out.println(node.id());
-                System.out.println(node.values().toString());
-
+                graphItemList.add(new GraphNode(node.id(), node.values().iterator().next().asString(), node.labels().iterator().next()));
             });
-            /*path.relationships().forEach(relationship -> {
-                graphItemList.add(new GraphEdge());
-            });*/
+            path.relationships().forEach(relationship -> {
+                graphItemList.add(new GraphEdge(relationship.id(),relationship.startNodeId(), relationship.endNodeId(), relationship.type()));
+            });
         }
-        System.out.println(graphItemList);
-
         driver.close();
         return graphItemList;
-
-        //System.out.println( String.format( "%s %s", record.get("p").get( "type" ).asString(), record.get("value").asString() ) );
     }
 
     private static abstract class GraphItem {
