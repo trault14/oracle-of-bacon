@@ -40,7 +40,6 @@ public class Neo4JRepository {
                 graphItemList.add(new GraphEdge(relationship.id(),relationship.startNodeId(), relationship.endNodeId(), relationship.type()));
             });
         }
-        driver.close();
         return graphItemList;
     }
 
