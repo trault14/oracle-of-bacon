@@ -2,6 +2,7 @@ package com.serli.oracle.of.bacon.loader.elasticsearch;
 
 import com.serli.oracle.of.bacon.repository.ElasticSearchRepository;
 import io.searchbox.client.JestClient;
+import io.searchbox.client.JestResult;
 import io.searchbox.core.Bulk;
 import io.searchbox.core.BulkResult;
 import io.searchbox.core.Index;
@@ -57,7 +58,25 @@ public class CompletionLoader {
             }
         }
 
-        return "{\"nickname\":\""+nickname+"\", \"firstname\":\""+firstname+"\", \"lastname\":\""+lastname+"\", \"rawname\":\""+line+"\"}";
+        String suggest = "[";
+        if(firstname.length()>=1){
+            suggest+="\""+firstname+"\"";
+        }
+        if(lastname.length()>=1){
+            if(firstname.length()>=1){
+                suggest+=",";
+            }
+            suggest+="\""+lastname+"\"";
+        }
+        if(nickname.length()>=1){
+            if(lastname.length()>=1 || firstname.length()>=1){
+                suggest+=",";
+            }
+            suggest+="\""+nickname+"\"";
+        }
+        suggest+="]";
+
+        return "{\"nickname\":\""+nickname+"\", \"firstname\":\""+firstname+"\", \"lastname\":\""+lastname+"\", \"rawname\":\""+line+"\", \"suggest\":"+suggest+"}";
     }
 
     public static void main(String[] args) throws IOException {
@@ -70,14 +89,32 @@ public class CompletionLoader {
         String inputFilePath = args[0];
         JestClient client = ElasticSearchRepository.createClient();
 
-        /*
+        client.execute(new CreateIndex.Builder("actors").build());
+
         PutMapping putMapping = new PutMapping.Builder(
                 "actors",
-                "Actor",
-                "{ \"Actor\" : { \"properties\" : { \"name\" : {\"type\" : \"string\"} } } }"
+                "actor",
+                "{ " +
+                        "\"actor\" : { " +
+                          "\"properties\" : { " +
+                            "\"suggest\" : { " +
+                              "\"type\" : \"completion\"" +
+                            "}," +
+                            "\"nickname\" : {" +
+                              "\"type\" : \"string\"" +
+                            "}," +
+                            "\"firstname\" : {" +
+                            "\"type\" : \"string\"" +
+                            "}," +
+                            "\"lastname\" : {" +
+                            "\"type\" : \"string\"" +
+                            "}" +
+                          "}" +
+                        "}" +
+                        "}"
         ).build();
-        client.execute(putMapping);
-        */
+        JestResult result = client.execute(putMapping);
+        System.out.println(result.getErrorMessage());
 
         List<Index> actors = new ArrayList<Index>();
 
