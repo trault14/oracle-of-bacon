@@ -1,11 +1,5 @@
 package com.serli.oracle.of.bacon.api;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Filters.*;
 import com.serli.oracle.of.bacon.repository.ElasticSearchRepository;
 import com.serli.oracle.of.bacon.repository.MongoDbRepository;
 import com.serli.oracle.of.bacon.repository.Neo4JRepository;
@@ -13,10 +7,9 @@ import com.serli.oracle.of.bacon.repository.RedisRepository;
 import net.codestory.http.annotations.Get;
 import org.bson.Document;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 public class APIEndPoint {
     private final Neo4JRepository neo4JRepository;
@@ -54,13 +47,6 @@ public class APIEndPoint {
     @Get("suggest?q=:searchQuery")
     public List<String> getActorSuggestion(String searchQuery) {
         return elasticSearchRepository.getActorsSuggests(searchQuery);
-        /*
-        return Arrays.asList("Niro, Chel",
-                "Senanayake, Niro",
-                "Niro, Juan Carlos",
-                "de la Rua, Niro",
-                "Niro, Simão");
-        */
     }
 
     @Get("last-searches")
@@ -70,13 +56,7 @@ public class APIEndPoint {
 
     @Get("actor?name=:actorName")
     public String getActorByName(String actorName) {
-        MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
-        MongoDatabase database = mongoClient.getDatabase("actors");
-        MongoCollection<Document> collection = database.getCollection("things");
-
-        Pattern testRegex = Pattern.compile(".*" + actorName + ".*");
-        Document myDoc = collection.find(Filters.regex("name:ID", testRegex)).first();
-
-        return myDoc.toJson();
+        Optional<Document> myDoc = mongoDbRepository.getActorByName(actorName);
+        return myDoc.get().toJson();
     }
 }
