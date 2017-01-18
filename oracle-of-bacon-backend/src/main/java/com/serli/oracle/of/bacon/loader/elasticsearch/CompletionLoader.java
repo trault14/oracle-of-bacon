@@ -132,9 +132,10 @@ public class CompletionLoader {
                             actors.clear();
                         }
                     });
+            bulkExecute(client, actors);
+        } catch (IOException e){
+            System.err.println("Error while reading csv file");
         }
-
-        bulkExecute(client, actors);
 
         System.out.println("Inserted total of " + count.get() + " actors");
     }
