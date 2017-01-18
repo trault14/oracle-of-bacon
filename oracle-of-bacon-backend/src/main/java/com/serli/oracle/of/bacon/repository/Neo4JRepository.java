@@ -3,7 +3,6 @@ package com.serli.oracle.of.bacon.repository;
 
 import org.neo4j.driver.v1.*;
 
-import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Path;
 
 import java.util.ArrayList;
