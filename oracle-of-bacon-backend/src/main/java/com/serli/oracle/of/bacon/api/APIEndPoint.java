@@ -54,6 +54,11 @@ public class APIEndPoint {
         return redisRepository.getLastTenSearches();
     }
 
+    /**
+     *
+     * @param actorName in the form "Name Surname"
+     * @return actor description
+     */
     @Get("actor?name=:actorName")
     public String getActorByName(String actorName) {
         Optional<Document> myDoc = mongoDbRepository.getActorByName(actorName);

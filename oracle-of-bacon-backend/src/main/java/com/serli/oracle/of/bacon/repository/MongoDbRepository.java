@@ -18,11 +18,11 @@ public class MongoDbRepository {
     }
 
     public Optional<Document> getActorByName(String name) {
-        MongoDatabase database = mongoClient.getDatabase("actors");
-        MongoCollection<Document> collection = database.getCollection("things");
+        MongoDatabase database = mongoClient.getDatabase("workshop");
+        MongoCollection<Document> collection = database.getCollection("actors");
 
         Pattern searchRegex = Pattern.compile(".*" + name + ".*");
-        Document myDoc = collection.find(Filters.regex("name:ID", searchRegex)).first();
+        Document myDoc = collection.find(Filters.regex("name", searchRegex)).first();
         return Optional.ofNullable(myDoc);
     }
 }
