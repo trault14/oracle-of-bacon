@@ -1,14 +1,22 @@
 package com.serli.oracle.of.bacon.api;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Filters.*;
 import com.serli.oracle.of.bacon.repository.ElasticSearchRepository;
 import com.serli.oracle.of.bacon.repository.MongoDbRepository;
 import com.serli.oracle.of.bacon.repository.Neo4JRepository;
 import com.serli.oracle.of.bacon.repository.RedisRepository;
 import net.codestory.http.annotations.Get;
+import org.bson.Document;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class APIEndPoint {
     private final Neo4JRepository neo4JRepository;
@@ -59,20 +67,13 @@ public class APIEndPoint {
 
     @Get("actor?name=:actorName")
     public String getActorByName(String actorName) {
-        return "{\n" +
-                "\"_id\": {\n" +
-                "\"$oid\": \"587bd993da2444c943a25161\"\n" +
-                "},\n" +
-                "\"imdb_id\": \"nm0000134\",\n" +
-                "\"name\": \"Robert De Niro\",\n" +
-                "\"birth_date\": \"1943-08-17\",\n" +
-                "\"description\": \"Robert De Niro, thought of as one of the greatest actors of all time, was born in Greenwich Village, Manhattan, New York City, to artists Virginia (Admiral) and Robert De Niro Sr. His paternal grandfather was of Italian descent, and his other ancestry is Irish, German, Dutch, English, and French. He was trained at the Stella Adler Conservatory and...\",\n" +
-                "\"image\": \"https://images-na.ssl-images-amazon.com/images/M/MV5BMjAwNDU3MzcyOV5BMl5BanBnXkFtZTcwMjc0MTIxMw@@._V1_UY317_CR13,0,214,317_AL_.jpg\",\n" +
-                "\"occupation\": [\n" +
-                "\"actor\",\n" +
-                "\"producer\",\n" +
-                "\"soundtrack\"\n" +
-                "]\n" +
-                "}";
+        MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+        MongoDatabase database = mongoClient.getDatabase("actors");
+        MongoCollection<Document> collection = database.getCollection("things");
+
+        Pattern testRegex = Pattern.compile(".*" + actorName + ".*");
+        Document myDoc = collection.find(Filters.regex("name:ID", testRegex)).first();
+
+        return myDoc.toJson();
     }
 }
