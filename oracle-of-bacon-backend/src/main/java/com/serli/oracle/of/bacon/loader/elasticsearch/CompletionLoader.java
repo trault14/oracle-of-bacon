@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CompletionLoader {
     private static AtomicInteger count = new AtomicInteger(0);
@@ -33,6 +35,31 @@ public class CompletionLoader {
         }
     }
 
+    private static String createJson(String line){
+        String firstname = "";
+        String lastname = "";
+        String nickname = "";
+        String rawname = line;
+
+        line = line.replace("\"", "");
+        String[] splittedLine = line.split(", ");
+        if(splittedLine.length == 1){
+            nickname = splittedLine[0];
+        }
+        else {
+            lastname = splittedLine[0];
+            firstname = splittedLine[1];
+            Pattern p = Pattern.compile("'*'");
+            Matcher m = p.matcher(splittedLine[0]);
+            if (m.find()) {
+                nickname = m.group();
+                lastname = splittedLine[0].replace(nickname, "");
+            }
+        }
+
+        return "{\"nickname\":\""+nickname+"\", \"firstname\":\""+firstname+"\", \"lastname\":\""+lastname+"\", \"rawname\":\""+line+"\"}";
+    }
+
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
             System.err.println("Expecting 1 arguments, actual : " + args.length);
@@ -43,12 +70,23 @@ public class CompletionLoader {
         String inputFilePath = args[0];
         JestClient client = ElasticSearchRepository.createClient();
 
+        /*
+        PutMapping putMapping = new PutMapping.Builder(
+                "actors",
+                "Actor",
+                "{ \"Actor\" : { \"properties\" : { \"name\" : {\"type\" : \"string\"} } } }"
+        ).build();
+        client.execute(putMapping);
+        */
+
         List<Index> actors = new ArrayList<Index>();
 
         try (BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(inputFilePath))) {
             bufferedReader.lines().skip(1)
                     .forEach(line -> {
-                        String source = "{\"name\":"+line+"}";
+
+                        String source = createJson(line);
+
                         System.out.println(source);
                         actors.add(new Index.Builder(source).build());
                         count.incrementAndGet();
